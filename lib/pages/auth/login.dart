@@ -6,8 +6,7 @@ import 'package:quiz_app/pages/home/home.dart';
 import 'package:quiz_app/providers/auth.dart';
 
 class LoginScreen extends StatefulWidget {
-  
-const  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -77,29 +76,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       UserModel user = UserModel(email: emailController.text);
 
-                      bool result = await authProvider.login(user);
-                      if (result) {
+                      UserModel? result = await authProvider.login(user);
+
+                      if (result != null) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => HomeScreen(user: user,)),
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(user: result),
+                          ),
                         );
-                        setState(() {
-                          isLoading = false;
-                        });
                       } else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FinalRegister(user: user,),
+                            builder: (context) => FinalRegister(user: user),
                           ),
                         );
-                        setState(() {
-                          errorMessage = true;
-                          isLoading = false;
-                        });
                       }
+
+                      setState(() {
+                        isLoading = false;
+                      });
                     }
                   },
+
                   child: isLoading
                       ? const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(

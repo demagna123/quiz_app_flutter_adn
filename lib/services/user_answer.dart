@@ -9,16 +9,29 @@ class UserAnswerApiService {
     ),
   );
 
-  Future<void> sendUserAnswer(UserAnswerModel userAnser) async {
+  void setToken(String token) {
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+
+  Future<void> sendUserAnswer(UserAnswerModel userAnswer) async {
     try {
       final response = await _dio.post(
         '/answers/submitAnswer',
-        data: userAnser.toJson(),
+        data: userAnswer.toJson(),
       );
-
-      print("Utilisateur créé : ${response.data}");
+      print("Réponse envoyée : ${response.data}");
     } catch (e) {
       print("Erreur lors de l'envoi : $e");
+    }
+  }
+
+  Future<Response> getUserScore() async {
+    try {
+      final response = await _dio.get('/user/score');
+      return response;
+    } catch (e) {
+      print("Erreur lors de la récupération du score : $e");
+      rethrow;
     }
   }
 }

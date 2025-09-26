@@ -20,3 +20,11 @@ class UserModel {
     return data;
   }
 }
+
+
+class AuthResponse {
+  final UserModel user;
+  final String token;
+
+  AuthResponse({required this.user, required this.token});
+}
