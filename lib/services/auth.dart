@@ -50,4 +50,13 @@ class AuthApiService {
       print("Erreur lors de l'envoi : $e");
     }
   }
+
+  Future<void> updateUser(UserModel user) async {
+    try {
+      final response = await _dio.put('/update/id', data: user.toJson());
+      print("Utilisateur créé : ${response.data}");
+    } catch (e) {
+      print("Erreur lors de l'envoi : $e");
+    }
+  }
 }

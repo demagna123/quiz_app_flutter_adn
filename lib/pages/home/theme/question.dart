@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/models/answer.dart';
+import 'package:quiz_app/models/question.dart';
 import 'package:quiz_app/pages/home/quiz.dart';
 import 'package:quiz_app/providers/answer.dart';
 import 'package:quiz_app/providers/auth.dart';
@@ -61,7 +63,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                     
                       Text(
                         "Q: ${question.description}",
                         style: TextStyle(
@@ -73,7 +74,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       Text("${question.marke} pts"),
                       SizedBox(height: 12),
 
-                      
                       if (answers.isEmpty)
                         Text("Aucune réponse enregistrée.")
                       else
@@ -91,6 +91,11 @@ class _QuestionScreenState extends State<QuestionScreen> {
                             );
                           }).toList(),
                         ),
+                      ElevatedButton.icon(
+                        onPressed: () => _openAddAnswerDialog(question.id!),
+                        icon: Icon(Icons.add),
+                        label: Text("Ajouter une réponse"),
+                      ),
                     ],
                   ),
                 ),
@@ -100,23 +105,22 @@ class _QuestionScreenState extends State<QuestionScreen> {
         },
       ),
       floatingActionButton: Column(
-  mainAxisSize: MainAxisSize.min,
-  children: [
-    FloatingActionButton.extended(
-      onPressed: _submitAnswers,
-      label: Text("Soumettre"),
-      icon: Icon(Icons.check),
-    ),
-    SizedBox(height: 12),
-    FloatingActionButton.extended(
-      // onPressed: (){},
-      onPressed: () => _openAddQuestionDialog(),
-      label: Text("Ajouter Question"),
-      icon: Icon(Icons.add),
-    ),
-  ],
-),
-
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: _submitAnswers,
+            label: Text("Soumettre"),
+            icon: Icon(Icons.check),
+          ),
+          SizedBox(height: 12),
+          FloatingActionButton.extended(
+            // onPressed: (){},
+            onPressed: () => _openAddQuestionDialog(),
+            label: Text("Ajouter Question"),
+            icon: Icon(Icons.add),
+          ),
+        ],
+      ),
     );
   }
 
@@ -145,7 +149,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://127.0.0.1:8000/api/answers/submitAnswers', 
+        'http://127.0.0.1:8000/api/answers/submitAnswers',
         data: {'answers': answers},
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -168,55 +172,134 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _openAddQuestionDialog() {
-  final _descriptionController = TextEditingController();
-  final _markeController = TextEditingController();
+    final _descriptionController = TextEditingController();
+    final _markeController = TextEditingController();
+    final questionProvider = Provider.of<QuestionProvider>(
+      context,
+      listen: false,
+    );
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text("Ajouter une question"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: "Description de la question"),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Ajouter une question"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(
+                  labelText: "Description de la question",
+                ),
+              ),
+              TextField(
+                controller: _markeController,
+                decoration: InputDecoration(labelText: "Nombre de points"),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler"),
             ),
-            TextField(
-              controller: _markeController,
-              decoration: InputDecoration(labelText: "Nombre de points"),
-              keyboardType: TextInputType.number,
+            ElevatedButton(
+              onPressed: () async {
+                final description = _descriptionController.text.trim();
+                final marke = int.tryParse(_markeController.text.trim()) ?? 0;
+
+                if (description.isEmpty || marke <= 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "Veuillez remplir correctement tous les champs.",
+                      ),
+                    ),
+                  );
+                  return;
+                }
+
+                QuestionModel newQuestion = QuestionModel(
+                  level_theme_id: widget.themeId,
+                  description: description,
+                  marke: marke,
+                );
+                // await _addQuestion(description, marke);
+                await questionProvider.addQuestion(newQuestion);
+                Navigator.pop(context); // fermer le modal
+              },
+              child: Text("Ajouter"),
             ),
           ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Annuler"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final description = _descriptionController.text.trim();
-              final marke = int.tryParse(_markeController.text.trim()) ?? 0;
+        );
+      },
+    );
+  }
 
-              if (description.isEmpty || marke <= 0) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Veuillez remplir correctement tous les champs.")),
+  void _openAddAnswerDialog(int questionId) {
+    final _descriptionController = TextEditingController();
+    bool _isCorrect = false;
+
+    final answerProvider = Provider.of<AnswerProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Ajouter une réponse"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: "Texte de la réponse"),
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _isCorrect,
+                    onChanged: (val) {
+                      _isCorrect = val ?? false;
+                      (context as Element).markNeedsBuild(); // pour refresh
+                    },
+                  ),
+                  Text("Bonne réponse ?"),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Annuler"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final description = _descriptionController.text.trim();
+
+                if (description.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Veuillez entrer une réponse.")),
+                  );
+                  return;
+                }
+
+                AnswerModel newAnswer = AnswerModel(
+                  question_id: questionId,
+                  description: description,
+                  is_correct: _isCorrect,
                 );
-                return;
-              }
 
-              // await _addQuestion(description, marke);
-
-              Navigator.pop(context); // fermer le modal
-            },
-            child: Text("Ajouter"),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+                await answerProvider.addAnswer(newAnswer);
+                Navigator.pop(context); // fermer la modal
+              },
+              child: Text("Ajouter"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

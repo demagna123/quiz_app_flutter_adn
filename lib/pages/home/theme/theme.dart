@@ -94,6 +94,7 @@ class _ThemeScreenState extends State<ThemeScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(title: Text("Les themes")),
       body: Consumer2<ThemeProvider, LevelProvider>(
         builder: (context, themeProvider, levelProvider, child) {
           if (themeProvider.themes.isEmpty || levelProvider.levels.isEmpty) {
@@ -125,8 +126,8 @@ class _ThemeScreenState extends State<ThemeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                       builder: (context) => QuestionScreen(themeId: theme.id!),
-
+                        builder: (context) =>
+                            QuestionScreen(themeId: theme.id!),
                       ),
                     );
                   },
