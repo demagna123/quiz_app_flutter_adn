@@ -5,7 +5,7 @@ import 'package:quiz_app/pages/home/home.dart';
 import 'package:quiz_app/providers/auth.dart';
 
 class FinalRegister extends StatefulWidget {
- final UserModel? user;
+  final UserModel? user;
   FinalRegister({required this.user});
 
   @override
@@ -41,7 +41,17 @@ class _FinalRegisterState extends State<FinalRegister> {
                 "Finissez votre inscription",
                 style: TextStyle(color: Colors.white, fontSize: 23),
               ),
-              SizedBox(height: 30), // espace vertical
+              SizedBox(height: 30),
+              if (errorMessage)
+                Container(
+                  width: 300,
+                  height: 50,
+                  color: Colors.red,
+                  child: Text(
+                    "Veillez remplire bien les champs",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                ), // espace vertical
               SizedBox(
                 width: 400,
                 child: TextField(
@@ -108,7 +118,9 @@ class _FinalRegisterState extends State<FinalRegister> {
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeScreen(user: user,)),
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(user: user),
+                        ),
                       );
                       setState(() {
                         isLoading = false;

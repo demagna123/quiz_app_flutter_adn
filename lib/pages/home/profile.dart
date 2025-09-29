@@ -6,7 +6,7 @@ import 'package:quiz_app/providers/auth.dart';
 
 class ProfilScreen extends StatefulWidget {
   final UserModel? user;
-  const ProfilScreen({required this.user});
+  ProfilScreen({required this.user});
 
   @override
   State<ProfilScreen> createState() => _ProfilScreenState();
@@ -27,38 +27,50 @@ class _ProfilScreenState extends State<ProfilScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return Scaffold(
-      backgroundColor: Color(0xFF451E70),
+      backgroundColor: Color(0xFFFFFFFF),
 
       body: Padding(
         padding: EdgeInsets.all(40),
         child: Center(
           // Centrage horizontal et vertical
           child: Column(
+            spacing: 30,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize
                 .min, // pour que la colonne prenne juste la taille des enfants
             children: [
               Text(
-                "Finissez votre inscription",
-                style: TextStyle(color: Colors.white, fontSize: 23),
+                "Modifier votre profile",
+                style: TextStyle(color: Color(0xFF451E70), fontSize: 23),
               ),
               SizedBox(height: 30), // espace vertical
+
+              if (errorMessage)
+                Container(
+                  width: 300,
+                  height: 50,
+                  color: Colors.red,
+                  child: Text(
+                    "Veillez remplire bien les champs",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                ),
               SizedBox(
                 width: 400,
                 child: TextField(
                   controller: emailController,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Color(0xFF451E70)),
                   decoration: InputDecoration(
                     label: Text(
                       "Email:",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      style: TextStyle(color: Color(0xFF451E70), fontSize: 18),
                     ),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                      borderSide: BorderSide(color: Color(0xFF451E70)),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                      borderSide: BorderSide(color: Color(0xFF451E70)),
                     ),
                   ),
                 ),
@@ -68,17 +80,17 @@ class _ProfilScreenState extends State<ProfilScreen> {
                 width: 400,
                 child: TextField(
                   controller: nameController,
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Color(0xFF451E70)),
                   decoration: InputDecoration(
                     label: Text(
                       "Name:",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      style: TextStyle(color: Color(0xFF451E70), fontSize: 18),
                     ),
                     enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                      borderSide: BorderSide(color: Color(0xFF451E70)),
                     ),
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                      borderSide: BorderSide(color: Color(0xFF451E70)),
                     ),
                   ),
                 ),
@@ -102,15 +114,18 @@ class _ProfilScreenState extends State<ProfilScreen> {
                       });
 
                       UserModel user = UserModel(
+                        id: widget.user?.id,
                         email: emailController.text,
                         name: nameController.text,
                       );
 
-                      await authProvider.addUser(user);
+                      await authProvider.updateUser(user);
 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeScreen(user: user,)),
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(user: user),
+                        ),
                       );
                       setState(() {
                         isLoading = false;
@@ -124,7 +139,7 @@ class _ProfilScreenState extends State<ProfilScreen> {
                           ),
                         )
                       : Text(
-                          "Suivant",
+                          "Modifier",
                           style: TextStyle(
                             color: Color(0xFF451E70),
                             fontSize: 16,

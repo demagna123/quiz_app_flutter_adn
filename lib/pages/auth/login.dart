@@ -38,7 +38,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 "Identifier-vous",
                 style: TextStyle(color: Colors.white, fontSize: 23),
               ),
-              SizedBox(height: 30), // espace vertical
+              SizedBox(height: 30),
+              if (errorMessage)
+                Container(
+                  width: 300,
+                  height: 50,
+                  color: Colors.red,
+                  child: Text(
+                    "Veillez remplire bien les champs",
+                    style: TextStyle(color: Colors.white, fontSize: 20),
+                  ),
+                ),
+              // espace vertical
               SizedBox(
                 width: 400,
                 child: TextField(

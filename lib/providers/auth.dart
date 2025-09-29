@@ -30,4 +30,9 @@ class AuthProvider with ChangeNotifier {
     await _apiService.addUser(user);
     notifyListeners();
   }
+
+  Future<void> updateUser(UserModel user) async {
+    await _apiService.updateUser(user);
+    notifyListeners();
+  }
 }

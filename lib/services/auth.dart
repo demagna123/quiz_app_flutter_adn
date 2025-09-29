@@ -22,12 +22,9 @@ class AuthApiService {
           print("Connexion réussie : ${data['message']}");
 
           final userJson = data['user']; // l'utilisateur depuis l'API
-          final token = data['token'];   // le token depuis l'API
+          final token = data['token']; // le token depuis l'API
 
-          return AuthResponse(
-            user: UserModel.fromJson(userJson),
-            token: token,
-          );
+          return AuthResponse(user: UserModel.fromJson(userJson), token: token);
         } else {
           print("Utilisateur non inscrit : ${data['message']}");
           return null;
@@ -53,7 +50,10 @@ class AuthApiService {
 
   Future<void> updateUser(UserModel user) async {
     try {
-      final response = await _dio.put('/update/id', data: user.toJson());
+      final response = await _dio.put(
+        '/update/${user.id}',
+        data: user.toJson(),
+      );
       print("Utilisateur créé : ${response.data}");
     } catch (e) {
       print("Erreur lors de l'envoi : $e");
